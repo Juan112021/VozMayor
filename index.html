@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VozMayor AI • Asistente de Salud y Orientación 100% por Voz</title>
+    <!-- Font Awesome 6 Free CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <!-- VENTANA PRINCIPAL ESTILO PLANE AI / GEMINI -->
+    <div class="workspace-window">
+
+        <!-- 1. TOPBAR SUPERIOR -->
+        <header class="window-topbar">
+            <div class="topbar-left" onclick="reiniciarConversacion()">
+                <span class="brand-logo-sq"><i class="fa-solid fa-sparkles"></i></span>
+                <span>VozMayor</span>
+                <i class="fa-solid fa-chevron-down" style="color: var(--text-muted); font-size: 0.65rem;"></i>
+            </div>
+
+            <div class="topbar-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input
+                    id="topSearchInput"
+                    type="text"
+                    placeholder="Buscar trámite, sede en Antioquia o escribir consulta..."
+                    onkeydown="if(event.key==='Enter'){ enviarConsulta(this.value); this.value=''; }"
+                />
+            </div>
+
+            <div class="topbar-right">
+                <!-- CONFIGURADOR DE API CLOUD WHISPER (GROQ / OPENAI) PARA OPERA -->
+                <button id="btnCloudSttConfig" class="btn-theme-toggle" onclick="configurarApiKeyVoz()" title="Configurar API Groq Whisper para Opera">
+                    <i class="fa-solid fa-cloud-bolt" style="color: var(--accent-blue);"></i>
+                    <span id="cloudSttBtnText">Motor Voz IA</span>
+                </button>
+
+                <!-- BOTÓN MODO CLARO / MODO OSCURO -->
+                <button id="btnThemeToggle" class="btn-theme-toggle" onclick="alternarModoClaroOscuro()">
+                    <i id="themeToggleIcon" class="fa-solid fa-moon"></i>
+                    <span id="themeToggleText">Modo Oscuro</span>
+                </button>
+
+                <button class="icon-btn-top" title="Notificaciones ADRES" onclick="enviarConsulta('Consultar certificado de afiliación ADRES')">
+                    <i class="fa-regular fa-bell"></i>
+                </button>
+                <button class="icon-btn-top" title="Orientación general" onclick="enviarConsulta('Necesito ayuda con un trámite')">
+                    <i class="fa-regular fa-circle-question"></i>
+                </button>
+                <button class="btn-ai-assistant-pill" onclick="alternarMicrofono()">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>AI assistant</span>
+                </button>
+                <div class="avatar-circle" title="Luz María Gómez — Orientadora VozMayor">LM</div>
+            </div>
+        </header>
+
+        <!-- CUERPO DE LA VENTANA -->
+        <div class="window-body">
+
+            <!-- 2. RAIL LATERAL IZQUIERDO -->
+            <nav class="nav-rail" aria-label="Navegación principal">
+                <button class="rail-item" onclick="reiniciarConversacion()">
+                    <span class="rail-icon"><i class="fa-solid fa-briefcase-medical"></i></span>
+                    <span>Trámites</span>
+                </button>
+                <button class="rail-item" onclick="enviarConsulta('Cuáles son las sedes y farmacias en Antioquia')">
+                    <span class="rail-icon"><i class="fa-solid fa-book-medical"></i></span>
+                    <span>Sedes</span>
+                </button>
+                <button class="rail-item active">
+                    <span class="rail-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                    <span>AI</span>
+                </button>
+                <button class="rail-item" style="margin-top: auto;" onclick="alternarModoClaroOscuro()">
+                    <span class="rail-icon"><i class="fa-solid fa-gear"></i></span>
+                    <span>Ajustes</span>
+                </button>
+            </nav>
+
+            <!-- 3. SIDEBAR SECUNDARIO (ESTILO PLANE AI: New chat, Skills, Favorites, Recents) -->
+            <aside class="nav-sidebar">
+                <div class="sidebar-header">
+                    <span class="sidebar-title">VozMayor AI</span>
+                    <i class="fa-regular fa-window-restore" style="color: var(--text-muted); font-size: 0.8rem;"></i>
+                </div>
+
+                <div class="new-chat-row">
+                    <button class="btn-new-chat" onclick="reiniciarConversacion()">
+                        <i class="fa-regular fa-pen-to-square"></i>
+                        <span>Nueva consulta</span>
+                    </button>
+                    <button class="btn-search-square" onclick="document.getElementById('composerVttInput').focus()" title="Ir al campo de voz">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                </div>
+
+                <div class="sidebar-section">
+                    <button class="sidebar-link" onclick="enviarConsulta('Cuáles son mis derechos según la Ley 1171')">
+                        <i class="fa-regular fa-lightbulb"></i>
+                        <span>Garantías Ley 1171</span>
+                    </button>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-label">
+                        <span>Favoritos</span>
+                        <i class="fa-solid fa-caret-down" style="font-size: 0.65rem;"></i>
+                    </div>
+                    <button class="sidebar-link" onclick="enviarConsulta('Quiero agendar una cita médica prioritaria')">
+                        <span>¿Cómo agendar cita en 48h?</span>
+                    </button>
+                    <button class="sidebar-link" onclick="enviarConsulta('Solicito entrega de medicamentos a domicilio gratuita')">
+                        <span>Programa VozMayor en Casa</span>
+                    </button>
+                    <button class="sidebar-link" onclick="enviarConsulta('Tengo dolor en el pecho y me falta el aire')">
+                        <span>Protocolo Triaje Vital 123</span>
+                    </button>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-label" style="justify-content: space-between;">
+                        <span style="display: inline-flex; align-items: center; gap: 5px;">
+                            <span>Consultas Recientes</span>
+                            <i class="fa-solid fa-caret-down" style="font-size: 0.65rem;"></i>
+                        </span>
+                        <button type="button" onclick="limpiarHistorialConsultasReales()" title="Limpiar historial" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:0.7rem;">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                    <!-- Contenedor 100% real y dinámico de las consultas hechas por el usuario -->
+                    <div id="recentQueriesList" style="display: flex; flex-direction: column; gap: 3px;">
+                        <div class="recent-empty-msg">Sus consultas aparecerán aquí a medida que converse con Luz María.</div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 4. LIENZO CENTRAL PRINCIPAL -->
+            <main class="main-canvas-wrapper">
+
+                <!-- Barra superior interna con controles de accesibilidad y voz -->
+                <div class="canvas-breadcrumb-bar">
+                    <div class="breadcrumb-trail">
+                        <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--accent-blue);"></i>
+                        <span>VozMayor AI</span>
+                        <span style="color: var(--text-muted); font-weight: 400;">•</span>
+                        <span id="breadcrumbCurrent" style="color: var(--text-secondary); font-weight: 500;">Orientadora Luz María Gómez</span>
+                    </div>
+
+                    <div class="toolbar-inline-controls">
+                        <button id="btnScaleNormal" class="tool-btn font-scale-btn" onclick="cambiarEscalaLetra('0.96rem', 'btnScaleNormal')">
+                            <i class="fa-solid fa-font"></i> Normal
+                        </button>
+                        <button id="btnScaleLarge" class="tool-btn font-scale-btn active" onclick="cambiarEscalaLetra('1.08rem', 'btnScaleLarge')">
+                            <i class="fa-solid fa-text-height"></i> Grande
+                        </button>
+                        <button id="btnScaleXLarge" class="tool-btn font-scale-btn" onclick="cambiarEscalaLetra('1.22rem', 'btnScaleXLarge')">
+                            <i class="fa-solid fa-magnifying-glass-plus"></i> Extra
+                        </button>
+
+                        <button id="btnSlowVoice" class="tool-btn" onclick="alternarVelocidadVoz()">
+                            <i class="fa-solid fa-gauge-simple-low"></i> Habla Pausada
+                        </button>
+                        <button class="tool-btn" onclick="repetirUltimaLocucion()">
+                            <i class="fa-solid fa-volume-high"></i> Escuchar
+                        </button>
+                        <button class="tool-btn" onclick="silenciarLocucion()">
+                            <i class="fa-solid fa-volume-xmark"></i> Silenciar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- HILO DE CONVERSACIÓN ACUMULATIVO ENTRE EL USUARIO Y LA IA -->
+                <div id="aiThreadScroll" class="ai-thread-scroll">
+                    <div id="aiThreadInner" class="ai-thread-inner">
+                        <!-- Cada turno de la conversación (Usuario + Thoughts + Respuesta IA + Tabla + Sugerencias) se agrega aquí dinámicamente sin borrar los anteriores -->
+                    </div>
+                </div>
+
+                <!-- ==========================================================
+                     CAJA COMPOSITORA INFERIOR CON CAMPO DE VOZ A TEXTO EN VIVO
+                     (Idéntica al cuadro inferior de Plane AI / Gemini)
+                     ========================================================== -->
+                <div class="composer-dock-wrapper">
+                    <div id="vttContainerBox" class="composer-box">
+
+                        <div class="composer-top-row">
+                            <span class="composer-context-pill">
+                                <i class="fa-solid fa-sparkles" style="color: var(--accent-blue);"></i>
+                                <span id="activeSedePill">VozMayor • IPS Medellín Centro</span>
+                            </span>
+
+                            <span class="live-voice-status">
+                                <span class="live-mic-dot"></span>
+                                <span id="vttStatusLabel">Voz a texto activo (es-CO)</span>
+                            </span>
+                        </div>
+
+                        <!-- BARRA DE ESCUCHA PACIENTE PARA EL ADULTO MAYOR -->
+                        <div id="voiceListeningHelper" class="voice-listening-helper" style="flex-direction: column; align-items: stretch; gap: 8px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div id="liveAudioMeterBars" class="listening-waves-bars">
+                                        <span></span><span></span><span></span><span></span><span></span>
+                                    </div>
+                                    <span id="listeningHelperText">Micrófono activo: Hable ahora con calma. Cuando termine de hablar, presione el botón azul «Enviar consulta»...</span>
+                                </div>
+                            </div>
+                            <!-- Chips de dictado rápido asistido para Adulto Mayor mientras habla -->
+                            <div style="display: flex; flex-wrap: wrap; gap: 6px; padding-top: 4px; border-top: 1px dashed rgba(22, 101, 52, 0.25);">
+                                <span style="font-size: 0.76rem; color: var(--text-secondary); display: inline-flex; align-items: center; margin-right: 4px;">
+                                    <i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 4px; color:#15803d;"></i> Ejemplos rápidos:
+                                </span>
+                                <button type="button" class="composer-chip-btn" style="background:var(--window-bg); font-size:0.76rem; padding:4px 9px;" onclick="insertarTextoDictado('Me llamo Carlos Restrepo, tengo 68 años, mi cédula es 70123456, vivo en Envigado y soy de EPS SURA')">
+                                    "Mis datos: Carlos, 68 años, Envigado, SURA"
+                                </button>
+                                <button type="button" class="composer-chip-btn" style="background:var(--window-bg); font-size:0.76rem; padding:4px 9px;" onclick="insertarTextoDictado('Necesito agendar una cita médica prioritaria')">
+                                    "Necesito una cita médica"
+                                </button>
+                                <button type="button" class="composer-chip-btn" style="background:var(--window-bg); font-size:0.76rem; padding:4px 9px;" onclick="insertarTextoDictado('Solicito el envío de mis medicamentos a domicilio')">
+                                    "Medicamentos a domicilio"
+                                </button>
+                                <button type="button" class="composer-chip-btn" style="background:var(--window-bg); font-size:0.76rem; padding:4px 9px;" onclick="insertarTextoDictado('En la farmacia me dejaron un medicamento pendiente')">
+                                    "Medicamento pendiente"
+                                </button>
+                                <button type="button" class="composer-chip-btn" style="background:var(--window-bg); font-size:0.76rem; padding:4px 9px;" onclick="insertarTextoDictado('Quiero mi certificado de afiliación ADRES')">
+                                    "Certificado ADRES"
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- CAMPO QUE CONVIERTE LA VOZ EN TEXTO -->
+                        <input
+                            id="composerVttInput"
+                            type="text"
+                            class="composer-vtt-input"
+                            placeholder="Presione «Dictar por voz», diga su nombre, edad, cédula, ciudad o su consulta y luego presione «Enviar consulta»..."
+                        />
+
+                        <div class="composer-bottom-toolbar">
+                            <div class="composer-tools-left">
+                                <button class="composer-chip-btn" onclick="reiniciarConversacion()" title="Nueva consulta">
+                                    <i class="fa-solid fa-plus"></i>
+                                    <span>Nueva consulta</span>
+                                </button>
+                                <button class="composer-chip-btn" onclick="enviarConsulta('Mostrar mi ficha de datos para la EPS')">
+                                    <i class="fa-regular fa-id-card"></i>
+                                    <span>Mi Ficha EPS</span>
+                                </button>
+                                <button class="composer-chip-btn" onclick="cambiarSedeCiclico()">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                    <span>Cambiar sede Antioquia</span>
+                                </button>
+                            </div>
+
+                            <div class="composer-tools-right">
+                                <button id="btnMicGiant" class="btn-composer-mic" onclick="alternarMicrofono()">
+                                    <i class="fa-solid fa-microphone"></i>
+                                    <span>Dictar por voz</span>
+                                </button>
+
+                                <button id="btnComposerSend" class="btn-composer-send" onclick="enviarConsultaDesdeBoton()" title="Enviar mi consulta a Luz María">
+                                    <span>Enviar consulta</span>
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="composer-disclaimer">
+                        VozMayor AI protege los derechos del Adulto Mayor (Ley 1171 de 2007 y Res. 1604). En caso de urgencia vital comuníquese a la Línea 123.
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
